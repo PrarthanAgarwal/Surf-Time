@@ -6,6 +6,7 @@ import { Settings } from 'lucide-react';
 import MainTab from './tabs/MainTab';
 import AnalysisTab from './tabs/AnalysisTab';
 import InsightsTab from './tabs/InsightsTab';
+import SettingsTab from './tabs/SettingsTab';
 
 const Layout = () => {
   const [activeTab, setActiveTab] = useState<TabType>('main');
@@ -38,10 +39,16 @@ const Layout = () => {
             ))}
           </div>
           <button
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className={cn(
+              "p-2 rounded-full transition-colors",
+              activeTab === 'settings'
+                ? "bg-primary text-white"
+                : "text-gray-500 hover:bg-gray-100"
+            )}
             aria-label="Settings"
+            onClick={() => setActiveTab('settings')}
           >
-            <Settings className="h-5 w-5 text-gray-500" />
+            <Settings className="h-5 w-5" />
           </button>
         </div>
       </header>
@@ -51,6 +58,7 @@ const Layout = () => {
         {activeTab === 'main' && <MainTab />}
         {activeTab === 'analysis' && <AnalysisTab />}
         {activeTab === 'insights' && <InsightsTab />}
+        {activeTab === 'settings' && <SettingsTab />}
       </main>
     </div>
   );

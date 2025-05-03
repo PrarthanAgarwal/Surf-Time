@@ -18,7 +18,7 @@ export interface DailySummary {
   }[];
 }
 
-export type TabType = 'main' | 'analysis' | 'insights';
+export type TabType = 'main' | 'analysis' | 'insights' | 'settings';
 
 export interface InsightType {
   id: string;
@@ -31,4 +31,20 @@ export interface AnalysisCategory {
   id: string;
   name: string;
   data: any; // This will vary based on the category
+}
+
+export interface UserSettings {
+  useMockData: boolean;
+  historyDaysToFetch: number;
+  autoGenerateInsights: boolean;
+  theme: 'light' | 'dark' | 'system';
+  privacyMode: boolean;
+}
+
+export interface ExportData {
+  version: string;
+  exportDate: string;
+  records: BrowsingRecord[];
+  insights: InsightType[];
+  settings: UserSettings;
 }

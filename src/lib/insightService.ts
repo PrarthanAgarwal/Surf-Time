@@ -1,11 +1,38 @@
 
 import { InsightType } from "./types";
 
+// Local storage key
+const INSIGHTS_STORAGE_KEY = 'generated_insights';
+
 // In a real extension, this would call the Gemini API
 // For now, we'll simulate it with pre-defined insights
 class InsightService {
   private insights: InsightType[] = [];
   private isLoading = false;
+  
+  constructor() {
+    // Try to load previously generated insights from localStorage
+    this.loadFromStorage();
+  }
+  
+  private loadFromStorage() {
+    try {
+      const storedInsights = localStorage.getItem(INSIGHTS_STORAGE_KEY);
+      if (storedInsights) {
+        this.insights = JSON.parse(storedInsights);
+      }
+    } catch (error) {
+      console.error('Error loading insights from storage:', error);
+    }
+  }
+  
+  private saveToStorage() {
+    try {
+      localStorage.setItem(INSIGHTS_STORAGE_KEY, JSON.stringify(this.insights));
+    } catch (error) {
+      console.error('Error saving insights to storage:', error);
+    }
+  }
   
   // Generate insights based on browsing data
   async generateInsights(): Promise<InsightType[]> {
@@ -48,6 +75,9 @@ class InsightService {
       }
     ];
     
+    // Save the generated insights to localStorage
+    this.saveToStorage();
+    
     this.isLoading = false;
     return this.insights;
   }
@@ -60,6 +90,12 @@ class InsightService {
   // Get previously generated insights
   getInsights(): InsightType[] {
     return [...this.insights];
+  }
+  
+  // Clear stored insights
+  clearInsights(): void {
+    this.insights = [];
+    localStorage.removeItem(INSIGHTS_STORAGE_KEY);
   }
 }
 
