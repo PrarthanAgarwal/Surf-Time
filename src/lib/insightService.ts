@@ -19,7 +19,7 @@ class InsightService {
       {
         id: '1',
         title: 'Digital Mountain Climber',
-        description: 'Your scrolling this week is equivalent to climbing Mount Everest 1.2 times! That's 10,598 meters of digital elevation.',
+        description: "Your scrolling this week is equivalent to climbing Mount Everest 1.2 times! That's 10,598 meters of digital elevation.",
         icon: '🏔️'
       },
       {
