@@ -151,26 +151,22 @@ class DataService {
   // Fetch browser history using the browser extension API
   private async fetchBrowserHistory(): Promise<void> {
     try {
-      // Check if we're in a browser extension environment
-      const isBrowserExtension = typeof chrome !== 'undefined' && chrome.history;
+      // Check if we're in a browser extension environment with proper typings
+      const isChromeExtension = typeof chrome !== 'undefined' && chrome.history;
+      const isFirefoxExtension = typeof browser !== 'undefined' && browser.history;
       
-      if (isBrowserExtension) {
+      if (isChromeExtension || isFirefoxExtension) {
         const startTimeMs = Date.now() - (this.settings.historyDaysToFetch * 24 * 60 * 60 * 1000);
         
         // Using Chrome history API
-        if (chrome.history) {
+        if (isChromeExtension) {
           const historyItems = await this.chromeHistorySearch(startTimeMs);
           this.records = this.transformHistoryItems(historyItems);
         } 
         // For Firefox, the API is similar but accessed differently
-        else if (typeof browser !== 'undefined' && browser.history) {
+        else if (isFirefoxExtension) {
           const historyItems = await this.firefoxHistorySearch(startTimeMs);
           this.records = this.transformHistoryItems(historyItems);
-        }
-        // Fallback to mock data if no browser APIs are available
-        else {
-          console.warn('No browser history API detected. Using mock data instead.');
-          this.records = generateMockData();
         }
       } else {
         // We're not in a browser extension context, use mock data
@@ -184,22 +180,29 @@ class DataService {
   }
   
   // Chrome history API wrapper
-  private chromeHistorySearch(startTime: number): Promise<any[]> {
+  private chromeHistorySearch(startTime: number): Promise<chrome.history.HistoryItem[]> {
     return new Promise((resolve) => {
-      chrome.history.search(
-        { text: '', startTime, maxResults: 5000 },
-        (results) => resolve(results)
-      );
+      if (typeof chrome !== 'undefined' && chrome.history) {
+        chrome.history.search(
+          { text: '', startTime, maxResults: 5000 },
+          (results) => resolve(results)
+        );
+      } else {
+        resolve([]);
+      }
     });
   }
   
   // Firefox history API wrapper
-  private firefoxHistorySearch(startTime: number): Promise<any[]> {
-    return (browser.history as any).search({
-      text: '',
-      startTime,
-      maxResults: 5000
-    });
+  private firefoxHistorySearch(startTime: number): Promise<browser.history.HistoryItem[]> {
+    if (typeof browser !== 'undefined' && browser.history) {
+      return browser.history.search({
+        text: '',
+        startTime,
+        maxResults: 5000
+      });
+    }
+    return Promise.resolve([]);
   }
   
   // Transform browser history items to our BrowsingRecord format
