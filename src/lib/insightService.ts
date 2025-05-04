@@ -2,41 +2,10 @@
 import { InsightType } from "./types";
 import { getFromExtensionStorage, saveToExtensionStorage } from "./extensionStorage";
 import { BrowsingRecord } from "./types";
+import { requestInsightsGeneration } from "./chromeApiService";
 
 // Storage key for insights
 const INSIGHTS_STORAGE_KEY = 'generated_insights';
-
-// Gemini prompt template for generating insights
-const INSIGHT_PROMPT = `
-You are an insightful and fun AI that creates metaphorical insights about browsing habits.
-Create ${5} unique, engaging insights based on the following browsing data:
-
-- Total browsing time: {totalTime} minutes
-- Top sites visited: {topSites}
-- Number of different domains: {domainCount}
-
-Each insight should:
-1. Have a creative, metaphorical title
-2. Include a fun, relatable description comparing browsing habits to real-world activities
-3. Be positive and light-hearted
-4. Include a relevant emoji icon
-
-Format each insight as a JSON object with these fields:
-- id: a unique string identifier
-- title: a creative metaphorical title
-- description: a fun, relatable description of the insight (1-2 sentences max)
-- icon: a single relevant emoji
-
-Example insight:
-{
-  "id": "digital-mountain-climber",
-  "title": "Digital Mountain Climber",
-  "description": "Your scrolling this week is equivalent to climbing Mount Everest 1.2 times!",
-  "icon": "🏔️"
-}
-
-Return a JSON array containing only the insights, with no additional text.
-`;
 
 class InsightService {
   private insights: InsightType[] = [];
@@ -66,15 +35,13 @@ class InsightService {
     }
   }
   
-  // Generate insights based on browsing data using Gemini 2.0 Flash
+  // Generate insights based on browsing data
   async generateInsights(browsingRecords: BrowsingRecord[]): Promise<InsightType[]> {
     this.isLoading = true;
     
     try {
       // Create summary of browsing data for the prompt
-      const totalTimeInMinutes = Math.round(
-        browsingRecords.reduce((sum, record) => sum + record.timeSpent, 0) / 60
-      );
+      const totalTimeInSeconds = browsingRecords.reduce((sum, record) => sum + record.timeSpent, 0);
       
       // Get top domains by time spent
       const domainMap = new Map<string, number>();
@@ -90,24 +57,28 @@ class InsightService {
       
       const domainCount = domainMap.size;
       
-      // Create prompt with actual data
-      const prompt = INSIGHT_PROMPT
-        .replace('{totalTime}', totalTimeInMinutes.toString())
-        .replace('{topSites}', topSites.join(', '))
-        .replace('{domainCount}', domainCount.toString());
+      // Send message to background script to generate insights
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        try {
+          const response = await requestInsightsGeneration({
+            totalTime: totalTimeInSeconds,
+            topSites,
+            domainCount
+          });
+          
+          if (response && response.success && response.insights) {
+            this.insights = response.insights;
+            await this.saveToStorage();
+            return this.insights;
+          }
+        } catch (error) {
+          console.error('Error requesting insights generation:', error);
+        }
+      }
       
-      // For the browser extension context, we can't directly call Gemini API
-      // Instead, we'll send a message to the background script to handle the API call
-      
-      // For now, use the simulated insights until we implement the API call
-      // In a real extension, you would make a call to the Gemini API via background script
-      // that has the necessary permissions to make external requests
-      
-      // Mock insights for now, in a real implementation this would be replaced
-      // with actual Gemini API calls
-      const mockGeminiResponse = this.generateMockInsights(totalTimeInMinutes, topSites, domainCount);
-      this.insights = mockGeminiResponse;
-      
+      // Fallback to mock insights if background script request fails
+      const mockInsights = this.generateMockInsights(totalTimeInSeconds, topSites, domainCount);
+      this.insights = mockInsights;
       await this.saveToStorage();
       return this.insights;
     } catch (error) {
@@ -119,13 +90,13 @@ class InsightService {
     }
   }
   
-  // Temporary mock insight generator
+  // Temporary mock insight generator (fallback when extension context is unavailable)
   private generateMockInsights(totalTime: number, topSites: string[], domainCount: number): InsightType[] {
     return [
       {
         id: '1',
         title: 'Digital Mountain Climber',
-        description: `Your ${totalTime} minutes of scrolling this week is equivalent to climbing Mount Everest 1.2 times! That's impressive digital elevation.`,
+        description: `Your ${Math.round(totalTime/60)} minutes of scrolling this week is equivalent to climbing Mount Everest 1.2 times!`,
         icon: '🏔️'
       },
       {
@@ -149,7 +120,7 @@ class InsightService {
       {
         id: '5',
         title: 'Sunset Collector',
-        description: `Your browsing session equals watching ${Math.round(totalTime / 30)} beautiful sunsets from start to finish. Time well spent!`,
+        description: `Your browsing session equals watching ${Math.round(totalTime / 1800)} beautiful sunsets from start to finish!`,
         icon: '🌅'
       }
     ];

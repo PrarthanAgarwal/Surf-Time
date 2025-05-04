@@ -1,3 +1,4 @@
+
 // Background script for the Screen Savvy Soul Searcher extension
 
 // Initialize variables to track active tab information
@@ -139,10 +140,68 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Handle generating insights
   if (message.type === 'generate_insights') {
     // In a real implementation, this would call the Gemini API
-    // For now, we'll just return a success message
-    sendResponse({ success: true });
+    generateMockInsights(message.data)
+      .then(insights => {
+        // Store generated insights
+        chrome.storage.local.set({ 
+          generated_insights: insights,
+          last_insight_generation: Date.now()
+        }, () => {
+          sendResponse({ success: true, insights });
+        });
+      })
+      .catch(error => {
+        console.error('Error generating insights:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    
+    return true; // Required for async sendResponse
   }
 });
+
+// Generate mock insights (to be replaced with Gemini API in production)
+function generateMockInsights(data) {
+  return new Promise((resolve) => {
+    const totalTime = data?.totalTime || 0;
+    const topSites = data?.topSites || [];
+    const domainCount = data?.domainCount || 0;
+    
+    setTimeout(() => {
+      resolve([
+        {
+          id: '1',
+          title: 'Digital Mountain Climber',
+          description: `Your ${Math.round(totalTime/60)} minutes of scrolling this week is equivalent to climbing Mount Everest 1.2 times!`,
+          icon: '🏔️'
+        },
+        {
+          id: '2',
+          title: 'Virtual Bookworm',
+          description: `If your browsing across ${domainCount} websites was printed on paper, you'd have read the equivalent of "War and Peace" - twice!`,
+          icon: '📚'
+        },
+        {
+          id: '3',
+          title: 'Social Butterfly Effect',
+          description: `Your clicks across ${topSites[0] || 'your favorite sites'} have created ripples of digital connections spanning five continents!`,
+          icon: '🦋'
+        },
+        {
+          id: '4',
+          title: 'Digital Polyglot',
+          description: `With your browsing time on ${topSites[1] || 'educational sites'}, you could have learned the basics of three new languages!`,
+          icon: '🗣️'
+        },
+        {
+          id: '5',
+          title: 'Sunset Collector',
+          description: `Your browsing session equals watching ${Math.round(totalTime / 1800)} beautiful sunsets from start to finish.`,
+          icon: '🌅'
+        }
+      ]);
+    }, 500);
+  });
+}
 
 // Initialize when extension loads
 function initialize() {

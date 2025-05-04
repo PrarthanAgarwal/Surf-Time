@@ -1,3 +1,4 @@
+
 /**
  * Chrome API Integration Service
  * Provides methods to interact with Chrome Extension APIs
@@ -34,7 +35,6 @@ export const setupRecordListener = (callback: (record: BrowsingRecord) => void):
   
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener(messageListener);
-    // Fix: Chrome runtime API type definition issue
     return () => {
       if (chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.removeListener(messageListener);
@@ -61,6 +61,26 @@ export const fetchChromeHistory = (daysToFetch: number = 7): Promise<BrowsingRec
     } else {
       console.warn('Chrome history API not available');
       resolve([]);
+    }
+  });
+};
+
+// Send a message to the background script to generate insights
+export const requestInsightsGeneration = (data: any): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      chrome.runtime.sendMessage(
+        { type: 'generate_insights', data }, 
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(response);
+          }
+        }
+      );
+    } else {
+      reject(new Error('Chrome runtime API not available'));
     }
   });
 };

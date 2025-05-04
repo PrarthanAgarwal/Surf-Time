@@ -24,6 +24,7 @@ export const getFromExtensionStorage = <T>(key: string): Promise<T | null> => {
         .then((result: any) => resolve(result[key] || null))
         .catch(() => resolve(null));
     } else {
+      console.warn('Extension storage API not available');
       resolve(null);
     }
   });
@@ -42,6 +43,7 @@ export const saveToExtensionStorage = (key: string, data: any): Promise<void> =>
         .then(resolve)
         .catch(() => resolve());
     } else {
+      console.warn('Extension storage API not available');
       resolve();
     }
   });
@@ -69,5 +71,23 @@ export const setupStorageListener = (callback: (changes: Record<string, any>) =>
       
       callback(processedChanges);
     });
+  } else {
+    console.warn('Extension storage change API not available');
   }
+};
+
+// Clear all data in extension storage
+export const clearExtensionStorage = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      chrome.storage.local.clear(resolve);
+    } else if (typeof browser !== 'undefined' && (browser as any).storage) {
+      (browser as any).storage.local.clear()
+        .then(resolve)
+        .catch(() => resolve());
+    } else {
+      console.warn('Extension storage API not available');
+      resolve();
+    }
+  });
 };

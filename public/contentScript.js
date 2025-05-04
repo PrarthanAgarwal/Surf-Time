@@ -50,5 +50,13 @@ setInterval(() => {
   }
 }, 30000);
 
+// Send initial page load information
+chrome.runtime.sendMessage({
+  type: 'page_loaded',
+  url: window.location.href,
+  title: document.title,
+  timestamp: Date.now()
+});
+
 // Initialize
 console.log('Screen Savvy Soul Searcher initialized on page');
