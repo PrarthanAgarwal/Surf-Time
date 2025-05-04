@@ -46,7 +46,7 @@ declare namespace chrome {
     export const managed: StorageArea;
     export const session: StorageArea;
 
-    export function onChanged: {
+    export const onChanged: {
       addListener(callback: (changes: StorageChanges, areaName: string) => void): void;
       removeListener(callback: (changes: StorageChanges, areaName: string) => void): void;
     };
@@ -67,7 +67,7 @@ declare namespace chrome {
 
   export namespace runtime {
     export function sendMessage(message: any, responseCallback?: (response: any) => void): void;
-    export function onMessage: {
+    export const onMessage: {
       addListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
     };
   }
@@ -116,7 +116,7 @@ declare namespace browser {
     export const sync: StorageArea;
     export const managed: StorageArea;
 
-    export function onChanged: {
+    export const onChanged: {
       addListener(callback: (changes: StorageChanges, areaName: string) => void): void;
       removeListener(callback: (changes: StorageChanges, areaName: string) => void): void;
     };
