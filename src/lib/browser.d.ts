@@ -68,6 +68,10 @@ declare namespace chrome {
   }
 
   export namespace runtime {
+    export interface LastError {
+      message?: string;
+    }
+    
     export interface MessageEvent {
       addListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
       removeListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
@@ -75,6 +79,7 @@ declare namespace chrome {
     
     export const onMessage: MessageEvent;
     export function sendMessage(message: any, responseCallback?: (response: any) => void): void;
+    export const lastError: LastError;
   }
 
   export namespace windows {
@@ -146,9 +151,14 @@ declare namespace browser {
   }
 
   export namespace runtime {
+    export interface LastError {
+      message?: string;
+    }
+    
     export function sendMessage(message: any): Promise<any>;
     export const onMessage: {
       addListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
     };
+    export const lastError: LastError;
   }
 }

@@ -1,4 +1,3 @@
-
 /**
  * Chrome API Integration Service
  * Provides methods to interact with Chrome Extension APIs
@@ -73,7 +72,7 @@ export const requestInsightsGeneration = (data: any): Promise<any> => {
         { type: 'generate_insights', data }, 
         (response) => {
           if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
+            reject(new Error(chrome.runtime.lastError.message || 'Unknown error'));
           } else {
             resolve(response);
           }
