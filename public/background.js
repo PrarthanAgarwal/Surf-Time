@@ -1,4 +1,3 @@
-
 // Background script for the Screen Savvy Soul Searcher extension
 
 // Initialize variables to track active tab information
@@ -19,6 +18,29 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.active) {
     updateActiveTab(tabId);
+  }
+});
+
+// Track window focus changes
+chrome.windows.onFocusChanged.addListener((windowId) => {
+  if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    // Browser lost focus, record current session
+    if (activeTabInfo.id !== null) {
+      const timeSpent = Math.floor((Date.now() - activeTabInfo.startTime) / 1000);
+      if (timeSpent > 1) {
+        recordBrowsingSession(activeTabInfo, timeSpent);
+      }
+      
+      // Reset active tab info
+      activeTabInfo.id = null;
+    }
+  } else {
+    // Browser gained focus, get active tab
+    chrome.tabs.query({ active: true, windowId }, (tabs) => {
+      if (tabs.length > 0) {
+        updateActiveTab(tabs[0].id);
+      }
+    });
   }
 });
 
@@ -87,6 +109,11 @@ function recordBrowsingSession(tabInfo, timeSpent) {
     const records = result.browsing_records || [];
     records.push(record);
     
+    // Limit the number of records (keep last 1000)
+    if (records.length > 1000) {
+      records.splice(0, records.length - 1000);
+    }
+    
     // Store updated records
     chrome.storage.local.set({ browsing_records: records });
     
@@ -94,6 +121,28 @@ function recordBrowsingSession(tabInfo, timeSpent) {
     chrome.runtime.sendMessage({ type: 'new_record', record });
   });
 }
+
+// Handle messages from popup or content scripts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle specific message types
+  if (message.type === 'get_current_tab') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        sendResponse({ tab: tabs[0] });
+      } else {
+        sendResponse({ tab: null });
+      }
+    });
+    return true; // Required for async sendResponse
+  }
+  
+  // Handle generating insights
+  if (message.type === 'generate_insights') {
+    // In a real implementation, this would call the Gemini API
+    // For now, we'll just return a success message
+    sendResponse({ success: true });
+  }
+});
 
 // Initialize when extension loads
 function initialize() {

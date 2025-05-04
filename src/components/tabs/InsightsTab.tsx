@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { InsightType } from '@/lib/types';
 import { insightService } from '@/lib/insightService';
+import { dataService } from '@/lib/dataService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const InsightsTab = () => {
   const [insights, setInsights] = useState<InsightType[]>([]);
@@ -11,13 +13,23 @@ const InsightsTab = () => {
   
   useEffect(() => {
     // Try to load any existing insights
-    setInsights(insightService.getInsights());
+    const loadInsights = async () => {
+      const savedInsights = await insightService.getInsights();
+      setInsights(savedInsights);
+    };
+    
+    loadInsights();
   }, []);
   
   const handleGenerateInsights = async () => {
     setIsGenerating(true);
     try {
-      const newInsights = await insightService.generateInsights();
+      // Make sure data is initialized
+      await dataService.initialize();
+      const records = dataService.getAllRecords();
+      
+      // Generate insights based on real browsing data
+      const newInsights = await insightService.generateInsights(records);
       setInsights(newInsights);
     } catch (error) {
       console.error('Failed to generate insights:', error);
@@ -36,7 +48,12 @@ const InsightsTab = () => {
             disabled={isGenerating}
             className="bg-primary hover:bg-primary/90"
           >
-            {isGenerating ? 'Generating...' : 'Generate Insights'}
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : 'Generate Insights'}
           </Button>
         </div>
         

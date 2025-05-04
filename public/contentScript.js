@@ -12,5 +12,43 @@ document.addEventListener('visibilitychange', () => {
   });
 });
 
+// Track user interaction with the page
+let lastInteractionTime = Date.now();
+let isUserActive = true;
+
+// Events to track for user activity
+const activityEvents = ['click', 'scroll', 'keydown', 'mousemove', 'touchstart'];
+
+// Add event listeners for all activity events
+activityEvents.forEach((eventType) => {
+  document.addEventListener(eventType, () => {
+    lastInteractionTime = Date.now();
+    
+    if (!isUserActive) {
+      isUserActive = true;
+      chrome.runtime.sendMessage({
+        type: 'user_activity_change',
+        isActive: true,
+        url: window.location.href
+      });
+    }
+  }, { passive: true });
+});
+
+// Check for user inactivity every 30 seconds
+setInterval(() => {
+  const inactivityThreshold = 60 * 1000; // 60 seconds
+  const currentTime = Date.now();
+  
+  if (isUserActive && (currentTime - lastInteractionTime > inactivityThreshold)) {
+    isUserActive = false;
+    chrome.runtime.sendMessage({
+      type: 'user_activity_change',
+      isActive: false,
+      url: window.location.href
+    });
+  }
+}, 30000);
+
 // Initialize
 console.log('Screen Savvy Soul Searcher initialized on page');

@@ -2,16 +2,33 @@
 import React, { useEffect, useState } from 'react';
 import { dataService } from '@/lib/dataService';
 import { BrowsingRecord, DailySummary } from '@/lib/types';
-import { formatTime, getDomainColor, getLast7Days } from '@/lib/utils';
+import { formatTime, getDomainColor } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { setupRecordListener, getCurrentTab } from '@/lib/chromeApiService';
 
 const MainTab = () => {
   const [todayRecords, setTodayRecords] = useState<BrowsingRecord[]>([]);
   const [todaySummary, setTodaySummary] = useState<DailySummary | null>(null);
   const [weekSummaries, setWeekSummaries] = useState<DailySummary[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
+  const [isExtensionContext, setIsExtensionContext] = useState(false);
   
   useEffect(() => {
+    // Check if we're running as an extension
+    const checkExtensionContext = async () => {
+      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+      setIsExtensionContext(!!isExtension);
+      
+      if (isExtension) {
+        // Get current tab info
+        const tab = await getCurrentTab();
+        setCurrentTab(tab);
+      }
+    };
+    
+    checkExtensionContext();
+    
     const initializeData = async () => {
       await dataService.initialize();
       const todayRecords = dataService.getTodayRecords();
@@ -25,6 +42,22 @@ const MainTab = () => {
     };
     
     initializeData();
+    
+    // Listen for new records from background script
+    const cleanupListener = setupRecordListener((record) => {
+      dataService.addRecord({
+        url: record.url,
+        title: record.title,
+        timeSpent: record.timeSpent
+      });
+      
+      // Refresh data
+      initializeData();
+    });
+    
+    return () => {
+      cleanupListener();
+    };
   }, []);
   
   const handleDateSelect = (date: string) => {
@@ -59,6 +92,20 @@ const MainTab = () => {
   
   return (
     <div className="fade-in">
+      {/* Extension status indicator */}
+      {isExtensionContext ? (
+        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-sm">
+          Running as browser extension
+          {currentTab && (
+            <div className="text-xs mt-1">Current tab: {currentTab.title}</div>
+          )}
+        </div>
+      ) : (
+        <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded-md text-sm">
+          Not running as browser extension. Some features may be limited.
+        </div>
+      )}
+      
       {/* Today's total */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Today's Screen Time</h2>

@@ -1,6 +1,8 @@
 
 import { BrowsingRecord, DailySummary, ExportData, UserSettings } from "./types";
 import { extractDomain, generateDailySummaries, generateMockData, getDateString } from "./utils";
+import { getFromExtensionStorage, saveToExtensionStorage, isExtensionContext } from "./extensionStorage";
+import { fetchChromeHistory } from "./chromeApiService";
 
 // Default settings
 const DEFAULT_SETTINGS: UserSettings = {
@@ -11,7 +13,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   privacyMode: false
 };
 
-// Local storage keys
+// Storage keys
 const STORAGE_KEYS = {
   RECORDS: 'browsing_records',
   SETTINGS: 'user_settings',
@@ -31,40 +33,76 @@ class DataService {
     // Load settings first
     await this.loadSettings();
     
-    // Get records from local storage if available
-    const storedRecords = this.getFromLocalStorage<BrowsingRecord[]>(STORAGE_KEYS.RECORDS);
+    // Determine if we're in an extension context
+    const extensionContext = isExtensionContext();
     
-    if (storedRecords && storedRecords.length > 0) {
-      this.records = storedRecords;
-    } else if (this.settings.useMockData) {
-      // Use mock data when no real data is available and mock is enabled
-      this.records = generateMockData();
+    if (extensionContext) {
+      // We're in an extension context, try to get data from extension storage
+      const storedRecords = await getFromExtensionStorage<BrowsingRecord[]>(STORAGE_KEYS.RECORDS);
+      
+      if (storedRecords && storedRecords.length > 0) {
+        this.records = storedRecords;
+      } else if (this.settings.useMockData) {
+        // Use mock data when no real data is available and mock is enabled
+        this.records = generateMockData();
+      } else {
+        // Fetch from browser history API
+        await this.fetchBrowserHistory();
+      }
     } else {
-      // Fetch from browser history API
-      await this.fetchBrowserHistory();
+      // We're not in an extension context, use local storage or mock data
+      const storedRecords = this.getFromLocalStorage<BrowsingRecord[]>(STORAGE_KEYS.RECORDS);
+      
+      if (storedRecords && storedRecords.length > 0) {
+        this.records = storedRecords;
+      } else {
+        // Use mock data since we're not in an extension
+        this.records = generateMockData();
+      }
     }
     
     this.summaries = generateDailySummaries(this.records);
     this.isInitialized = true;
     
-    // Save to local storage (in case we used mock data)
-    this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
-  }
-  
-  private async loadSettings(): Promise<void> {
-    const storedSettings = this.getFromLocalStorage<UserSettings>(STORAGE_KEYS.SETTINGS);
-    if (storedSettings) {
-      this.settings = { ...DEFAULT_SETTINGS, ...storedSettings };
+    // Save to storage (in case we used mock data)
+    if (extensionContext) {
+      await saveToExtensionStorage(STORAGE_KEYS.RECORDS, this.records);
     } else {
-      this.settings = { ...DEFAULT_SETTINGS };
-      this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
+      this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
     }
   }
   
-  // Save settings to local storage
+  private async loadSettings(): Promise<void> {
+    let settings;
+    
+    if (isExtensionContext()) {
+      settings = await getFromExtensionStorage<UserSettings>(STORAGE_KEYS.SETTINGS);
+    } else {
+      settings = this.getFromLocalStorage<UserSettings>(STORAGE_KEYS.SETTINGS);
+    }
+    
+    if (settings) {
+      this.settings = { ...DEFAULT_SETTINGS, ...settings };
+    } else {
+      this.settings = { ...DEFAULT_SETTINGS };
+      
+      if (isExtensionContext()) {
+        await saveToExtensionStorage(STORAGE_KEYS.SETTINGS, this.settings);
+      } else {
+        this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
+      }
+    }
+  }
+  
+  // Save settings to storage
   async saveSettings(newSettings: Partial<UserSettings>): Promise<void> {
     this.settings = { ...this.settings, ...newSettings };
-    this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
+    
+    if (isExtensionContext()) {
+      await saveToExtensionStorage(STORAGE_KEYS.SETTINGS, this.settings);
+    } else {
+      this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
+    }
     
     // Re-initialize if useMockData setting changed
     if (newSettings.useMockData !== undefined) {
@@ -99,9 +137,15 @@ class DataService {
   }
   
   // Clear all stored data
-  clearAllData(): void {
-    localStorage.removeItem(STORAGE_KEYS.RECORDS);
-    localStorage.removeItem(STORAGE_KEYS.INSIGHTS);
+  async clearAllData(): Promise<void> {
+    if (isExtensionContext()) {
+      await saveToExtensionStorage(STORAGE_KEYS.RECORDS, null);
+      await saveToExtensionStorage(STORAGE_KEYS.INSIGHTS, null);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.RECORDS);
+      localStorage.removeItem(STORAGE_KEYS.INSIGHTS);
+    }
+    
     this.records = [];
     this.summaries = [];
     this.isInitialized = false;
@@ -128,14 +172,20 @@ class DataService {
       
       // Import records
       this.records = data.records;
-      this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
       
       // Import settings
       this.settings = data.settings;
-      this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
       
-      // Import insights
-      this.saveToLocalStorage(STORAGE_KEYS.INSIGHTS, data.insights);
+      // Save to appropriate storage
+      if (isExtensionContext()) {
+        await saveToExtensionStorage(STORAGE_KEYS.RECORDS, this.records);
+        await saveToExtensionStorage(STORAGE_KEYS.SETTINGS, this.settings);
+        await saveToExtensionStorage(STORAGE_KEYS.INSIGHTS, data.insights);
+      } else {
+        this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
+        this.saveToLocalStorage(STORAGE_KEYS.SETTINGS, this.settings);
+        this.saveToLocalStorage(STORAGE_KEYS.INSIGHTS, data.insights);
+      }
       
       // Regenerate summaries
       this.summaries = generateDailySummaries(this.records);
@@ -148,117 +198,28 @@ class DataService {
     }
   }
   
-  // Fetch browser history using the browser extension API
+  // Fetch browser history using the extension API
   private async fetchBrowserHistory(): Promise<void> {
     try {
-      // Check if we're in a browser extension environment with proper typings
-      const isChromeExtension = typeof chrome !== 'undefined' && chrome.history;
-      const isFirefoxExtension = typeof browser !== 'undefined' && browser.history;
+      let historyRecords: BrowsingRecord[] = [];
       
-      if (isChromeExtension || isFirefoxExtension) {
-        const startTimeMs = Date.now() - (this.settings.historyDaysToFetch * 24 * 60 * 60 * 1000);
-        
-        // Using Chrome history API
-        if (isChromeExtension) {
-          const historyItems = await this.chromeHistorySearch(startTimeMs);
-          this.records = this.transformHistoryItems(historyItems);
-        } 
-        // For Firefox, the API is similar but accessed differently
-        else if (isFirefoxExtension) {
-          const historyItems = await this.firefoxHistorySearch(startTimeMs);
-          this.records = this.transformHistoryItems(historyItems);
-        }
+      // Try to use Chrome API first
+      if (isExtensionContext()) {
+        historyRecords = await fetchChromeHistory(this.settings.historyDaysToFetch);
+      } 
+      
+      // If we got records, use them
+      if (historyRecords.length > 0) {
+        this.records = historyRecords;
       } else {
-        // We're not in a browser extension context, use mock data
-        console.warn('Not running in extension context. Using mock data.');
+        // Fallback to mock data
+        console.warn('No history data available. Using mock data.');
         this.records = generateMockData();
       }
     } catch (error) {
       console.error('Error fetching browser history:', error);
       this.records = generateMockData();
     }
-  }
-  
-  // Chrome history API wrapper
-  private chromeHistorySearch(startTime: number): Promise<chrome.history.HistoryItem[]> {
-    return new Promise((resolve) => {
-      if (typeof chrome !== 'undefined' && chrome.history) {
-        chrome.history.search(
-          { text: '', startTime, maxResults: 5000 },
-          (results) => resolve(results)
-        );
-      } else {
-        resolve([]);
-      }
-    });
-  }
-  
-  // Firefox history API wrapper
-  private firefoxHistorySearch(startTime: number): Promise<browser.history.HistoryItem[]> {
-    if (typeof browser !== 'undefined' && browser.history) {
-      return browser.history.search({
-        text: '',
-        startTime,
-        maxResults: 5000
-      });
-    }
-    return Promise.resolve([]);
-  }
-  
-  // Transform browser history items to our BrowsingRecord format
-  private transformHistoryItems(items: any[]): BrowsingRecord[] {
-    const records: BrowsingRecord[] = [];
-    const now = Date.now();
-    
-    // Group by URL to aggregate visit times
-    const urlMap = new Map<string, {
-      title: string;
-      url: string;
-      visitCount: number;
-      lastVisitTime: number;
-    }>();
-    
-    items.forEach(item => {
-      // Skip empty URLs or internal browser pages
-      if (!item.url || 
-          item.url.startsWith('chrome://') || 
-          item.url.startsWith('about:') ||
-          item.url.startsWith('moz-extension://')) {
-        return;
-      }
-      
-      const existing = urlMap.get(item.url);
-      if (existing) {
-        existing.visitCount += item.visitCount || 1;
-        existing.lastVisitTime = Math.max(existing.lastVisitTime, item.lastVisitTime);
-      } else {
-        urlMap.set(item.url, {
-          title: item.title || 'Unknown Page',
-          url: item.url,
-          visitCount: item.visitCount || 1,
-          lastVisitTime: item.lastVisitTime
-        });
-      }
-    });
-    
-    // Convert to our BrowsingRecord format
-    urlMap.forEach(item => {
-      const date = new Date(item.lastVisitTime);
-      const dateString = getDateString(date);
-      // Estimate time spent based on visit count (multiply by average 2 minutes per visit)
-      const estimatedTimeSpent = item.visitCount * 120; // in seconds
-      
-      records.push({
-        url: item.url,
-        title: item.title,
-        domain: extractDomain(item.url),
-        timeSpent: estimatedTimeSpent,
-        date: dateString,
-        timestamp: item.lastVisitTime
-      });
-    });
-    
-    return records;
   }
   
   // Get all browsing records
@@ -302,7 +263,13 @@ class DataService {
     
     this.records.push(newRecord);
     this.summaries = generateDailySummaries(this.records);
-    this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
+    
+    // Save to appropriate storage
+    if (isExtensionContext()) {
+      saveToExtensionStorage(STORAGE_KEYS.RECORDS, this.records);
+    } else {
+      this.saveToLocalStorage(STORAGE_KEYS.RECORDS, this.records);
+    }
   }
 }
 
