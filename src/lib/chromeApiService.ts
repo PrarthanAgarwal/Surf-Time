@@ -1,4 +1,3 @@
-
 /**
  * Chrome API Integration Service
  * Provides methods to interact with Chrome Extension APIs
@@ -35,7 +34,12 @@ export const setupRecordListener = (callback: (record: BrowsingRecord) => void):
   
   if (typeof chrome !== 'undefined' && chrome.runtime) {
     chrome.runtime.onMessage.addListener(messageListener);
-    return () => chrome.runtime.onMessage.removeListener(messageListener);
+    // Fix: Chrome runtime API type definition issue
+    return () => {
+      if (chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.removeListener(messageListener);
+      }
+    };
   }
   
   return () => {};

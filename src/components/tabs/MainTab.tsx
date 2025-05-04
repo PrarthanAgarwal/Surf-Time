@@ -17,7 +17,8 @@ const MainTab = () => {
   useEffect(() => {
     // Check if we're running as an extension
     const checkExtensionContext = async () => {
-      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+      // Fix: Check for chrome.runtime without accessing id property
+      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime;
       setIsExtensionContext(!!isExtension);
       
       if (isExtension) {

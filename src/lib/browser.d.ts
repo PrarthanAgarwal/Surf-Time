@@ -46,10 +46,12 @@ declare namespace chrome {
     export const managed: StorageArea;
     export const session: StorageArea;
 
-    export const onChanged: {
+    export interface StorageChangeEvent {
       addListener(callback: (changes: StorageChanges, areaName: string) => void): void;
       removeListener(callback: (changes: StorageChanges, areaName: string) => void): void;
-    };
+    }
+
+    export const onChanged: StorageChangeEvent;
   }
 
   export namespace tabs {
@@ -66,10 +68,18 @@ declare namespace chrome {
   }
 
   export namespace runtime {
-    export function sendMessage(message: any, responseCallback?: (response: any) => void): void;
-    export const onMessage: {
+    export interface MessageEvent {
       addListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
-    };
+      removeListener(callback: (message: any, sender: any, sendResponse: (response?: any) => void) => void): void;
+    }
+    
+    export const onMessage: MessageEvent;
+    export function sendMessage(message: any, responseCallback?: (response: any) => void): void;
+  }
+
+  export namespace windows {
+    export const WINDOW_ID_NONE: number;
+    export function onFocusChanged(callback: (windowId: number) => void): void;
   }
 }
 
