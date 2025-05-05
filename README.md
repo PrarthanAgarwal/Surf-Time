@@ -1,73 +1,100 @@
-# Welcome to your Lovable project
+# Surf Time - Browser Time Tracking Extension
 
-## Project info
+A Chrome extension that helps you track and analyze your browsing habits to gain insights about your screen time.
 
-**URL**: https://lovable.dev/projects/41728d26-c05f-4b31-ae1b-da134a81d1ba
+## Features
 
-## How can I edit this code?
+- Track active browsing time across different websites
+- Analyze browsing patterns and habits
+- View detailed statistics about your internet usage
+- Privacy-focused local data storage
+- Beautiful and intuitive user interface built with React and shadcn-ui
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend Framework**: React with TypeScript
+- **Build Tool**: Vite
+- **UI Components**: shadcn-ui
+- **Styling**: Tailwind CSS
+- **State Management**: React Query
+- **Form Handling**: React Hook Form
+- **Data Visualization**: Recharts
+- **Chrome Extension APIs**: 
+  - Storage API
+  - History API
+  - Tabs API
+  - Windows API
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/41728d26-c05f-4b31-ae1b-da134a81d1ba) and start prompting.
+## Installation
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+1. Clone the repository:
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone <repository-url>
+cd screen-savvy-soul-searcher
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies:
+```sh
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Build the extension:
+```sh
+npm run build
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Load the extension in Chrome:
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" in the top right
+   - Click "Load unpacked" and select the `dist` folder from your project directory
+
+## Development
+
+1. Start the development server:
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+2. For development builds with hot reload:
+```sh
+npm run build:dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Lint the code:
+```sh
+npm run lint
+```
 
-**Use GitHub Codespaces**
+## Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `/src` - Main source code
+  - `/components` - React components
+  - `/hooks` - Custom React hooks
+  - `/lib` - Utility functions and shared logic
+- `/public` - Static assets and manifest.json
+- `/dist` - Build output directory
 
-## What technologies are used for this project?
+## Permissions
 
-This project is built with:
+This extension requires the following permissions:
+- `history` - To track browsing history
+- `storage` - To store user preferences and tracking data
+- `tabs` - To monitor active tabs
+- `activeTab` - To access the current tab
+- `windows` - To track window focus state
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Privacy
 
-## How can I deploy this project?
+All data is stored locally on your device. No data is sent to external servers.
 
-Simply open [Lovable](https://lovable.dev/projects/41728d26-c05f-4b31-ae1b-da134a81d1ba) and click on Share -> Publish.
+## Contributing
 
-## Can I connect a custom domain to my Lovable project?
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License.

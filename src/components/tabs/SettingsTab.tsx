@@ -260,7 +260,7 @@ const SettingsTab = () => {
             </p>
             <div className="flex mt-4 gap-4">
               <a 
-                href="https://github.com/surftime" 
+                href="https://github.com/PrarthanAgarwal/Surf-Time" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors"
@@ -269,7 +269,7 @@ const SettingsTab = () => {
                 GitHub
               </a>
               <a 
-                href="https://twitter.com/surftime" 
+                href="https://x.com/prarthanagarwal" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors"
