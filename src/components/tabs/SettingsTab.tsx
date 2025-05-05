@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { UserSettings, ExportData } from '@/lib/types';
 import { dataService } from '@/lib/dataService';
@@ -166,12 +167,12 @@ const SettingsTab = () => {
   }
   
   return (
-    <div className="container mx-auto fade-in">
+    <div className="w-full fade-in">
       <h2 className="text-2xl font-bold mb-6">Settings</h2>
       
       {/* Extension status indicator - only visible in settings tab */}
       {isExtensionContext ? (
-        <Card className="mb-6">
+        <Card className="mb-6 w-full">
           <CardContent className="pt-6">
             <div className="p-2 bg-green-100 text-green-700 rounded-md">
               <p className="font-medium">Running as browser extension</p>
@@ -182,7 +183,7 @@ const SettingsTab = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-6">
+        <Card className="mb-6 w-full">
           <CardContent className="pt-6">
             <div className="p-2 bg-yellow-100 text-yellow-700 rounded-md">
               <p>Not running as browser extension. Some features may be limited.</p>
@@ -191,9 +192,9 @@ const SettingsTab = () => {
         </Card>
       )}
       
-      <div className="space-y-6">
+      <div className="space-y-6 w-full">
         {/* Data Management */}
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>Data Management</CardTitle>
             <CardDescription>Export, import or clear your data</CardDescription>
@@ -247,7 +248,7 @@ const SettingsTab = () => {
         </Card>
         
         {/* About */}
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>About</CardTitle>
             <CardDescription>Surf Time</CardDescription>
