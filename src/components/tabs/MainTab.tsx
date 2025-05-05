@@ -134,14 +134,6 @@ const MainTab = () => {
               {todaySummary ? formatTime(todaySummary.totalTime) : '0m'}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-gray-500 text-sm">Top Site</p>
-            <p className="text-lg font-medium">
-              {todaySummary && todaySummary.topSites.length > 0 
-                ? todaySummary.topSites[0].domain 
-                : 'None'}
-            </p>
-          </div>
         </div>
       </div>
       
