@@ -12,23 +12,15 @@ const MainTab = () => {
   const [weekSummaries, setWeekSummaries] = useState<DailySummary[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
-  const [isExtensionContext, setIsExtensionContext] = useState(false);
   
   useEffect(() => {
-    // Check if we're running as an extension
-    const checkExtensionContext = async () => {
-      // Fix: Check for chrome.runtime without accessing id property
-      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime;
-      setIsExtensionContext(!!isExtension);
-      
-      if (isExtension) {
-        // Get current tab info
-        const tab = await getCurrentTab();
-        setCurrentTab(tab);
-      }
+    // Get current tab info
+    const fetchCurrentTab = async () => {
+      const tab = await getCurrentTab();
+      setCurrentTab(tab);
     };
     
-    checkExtensionContext();
+    fetchCurrentTab();
     
     const initializeData = async () => {
       await dataService.initialize();
@@ -38,8 +30,12 @@ const MainTab = () => {
       
       setTodayRecords(todayRecords);
       setTodaySummary(todaySummary || null);
-      setWeekSummaries(allSummaries);
-      setSelectedDate(allSummaries[allSummaries.length - 1]?.date || '');
+      
+      // Ensure we have a full week of data (7 days)
+      const fullWeekData = ensureFullWeekData(allSummaries);
+      setWeekSummaries(fullWeekData);
+      
+      setSelectedDate(fullWeekData[fullWeekData.length - 1]?.date || '');
     };
     
     initializeData();
@@ -60,6 +56,36 @@ const MainTab = () => {
       cleanupListener();
     };
   }, []);
+  
+  // Helper function to ensure we always have 7 days of data for visualization
+  const ensureFullWeekData = (summaries: DailySummary[]): DailySummary[] => {
+    const result: DailySummary[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Create an array of the last 7 days
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Find if we have data for this date
+      const existingData = summaries.find(s => s.date === dateStr);
+      
+      if (existingData) {
+        result.push(existingData);
+      } else {
+        // If no data exists, create an empty entry
+        result.push({
+          date: dateStr,
+          totalTime: 0,
+          topSites: []
+        });
+      }
+    }
+    
+    return result;
+  };
   
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
@@ -93,20 +119,6 @@ const MainTab = () => {
   
   return (
     <div className="fade-in">
-      {/* Extension status indicator */}
-      {isExtensionContext ? (
-        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-sm">
-          Running as browser extension
-          {currentTab && (
-            <div className="text-xs mt-1">Current tab: {currentTab.title}</div>
-          )}
-        </div>
-      ) : (
-        <div className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded-md text-sm">
-          Not running as browser extension. Some features may be limited.
-        </div>
-      )}
-      
       {/* Today's total */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Today's Screen Time</h2>
@@ -133,15 +145,15 @@ const MainTab = () => {
         <h2 className="text-lg font-semibold mb-2">Last 7 Days</h2>
         <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex justify-between items-end h-32 mb-2">
-            {weekSummaries.map(summary => {
-              const heightPercentage = Math.max(
+            {weekSummaries.map((summary, index) => {
+              const heightPercentage = summary.totalTime === 0 ? 5 : Math.max(
                 (summary.totalTime / maxScreenTime) * 100, 
                 5
               );
               
               return (
                 <div 
-                  key={summary.date} 
+                  key={index}
                   className="flex flex-col items-center flex-1"
                   onClick={() => handleDateSelect(summary.date)}
                 >

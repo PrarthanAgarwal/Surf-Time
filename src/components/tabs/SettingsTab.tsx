@@ -12,10 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Download, Upload, Trash2, RefreshCw } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { getCurrentTab } from '@/lib/chromeApiService';
 
 const SettingsTab = () => {
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
+  const [isExtensionContext, setIsExtensionContext] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
@@ -31,6 +34,19 @@ const SettingsTab = () => {
       }
     };
     
+    // Check if we're running as an extension
+    const checkExtensionContext = async () => {
+      const isExtension = typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime;
+      setIsExtensionContext(!!isExtension);
+      
+      if (isExtension) {
+        // Get current tab info
+        const tab = await getCurrentTab();
+        setCurrentTab(tab);
+      }
+    };
+    
+    checkExtensionContext();
     loadSettings();
   }, []);
   
@@ -157,6 +173,28 @@ const SettingsTab = () => {
   return (
     <div className="container mx-auto fade-in">
       <h2 className="text-2xl font-bold mb-6">Settings</h2>
+      
+      {/* Extension status indicator */}
+      {isExtensionContext ? (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="p-2 bg-green-100 text-green-700 rounded-md">
+              <p className="font-medium">Running as browser extension</p>
+              {currentTab && (
+                <p className="text-xs mt-1">Current tab: {currentTab.title}</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="p-2 bg-yellow-100 text-yellow-700 rounded-md">
+              <p>Not running as browser extension. Some features may be limited.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="space-y-6">
         {/* Data Sources */}
@@ -323,7 +361,7 @@ const SettingsTab = () => {
         <Card>
           <CardHeader>
             <CardTitle>About</CardTitle>
-            <CardDescription>Screen Time Extension</CardDescription>
+            <CardDescription>Surf Time</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm">Version 1.0</p>

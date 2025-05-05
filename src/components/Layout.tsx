@@ -12,7 +12,7 @@ const Layout = () => {
   const [activeTab, setActiveTab] = useState<TabType>('main');
 
   const tabs: { id: TabType; label: string }[] = [
-    { id: 'main', label: 'Main' },
+    { id: 'main', label: 'Dashboard' },
     { id: 'analysis', label: 'Analysis' },
     { id: 'insights', label: 'Insights' },
   ];
@@ -21,8 +21,15 @@ const Layout = () => {
     <div className="extension-container flex flex-col h-full">
       {/* Header with tabs */}
       <header className="border-b border-gray-200 bg-white">
-        <div className="flex justify-between items-center px-4">
-          <div className="flex space-x-1 py-2">
+        <div className="flex items-center px-4 py-2">
+          {/* Extension Logo and Name */}
+          <div className="flex items-center mr-6">
+            <img src="/icons/icon32.png" alt="Surf Time" className="w-6 h-6 mr-2" />
+            <span className="font-medium text-primary">Surf Time</span>
+          </div>
+          
+          {/* Navigation */}
+          <div className="flex flex-1 space-x-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

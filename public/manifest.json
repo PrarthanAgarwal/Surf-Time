@@ -1,7 +1,7 @@
 
 {
   "manifest_version": 3,
-  "name": "Screen Savvy Soul Searcher",
+  "name": "Surf Time",
   "version": "1.0.0",
   "description": "Track and analyze your browsing habits to gain insights about your screen time",
   "permissions": [
