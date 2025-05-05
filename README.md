@@ -10,21 +10,6 @@ A Chrome extension that helps you track and analyze your browsing habits to gain
 - Privacy-focused local data storage
 - Beautiful and intuitive user interface built with React and shadcn-ui
 
-## Tech Stack
-
-- **Frontend Framework**: React with TypeScript
-- **Build Tool**: Vite
-- **UI Components**: shadcn-ui
-- **Styling**: Tailwind CSS
-- **State Management**: React Query
-- **Form Handling**: React Hook Form
-- **Data Visualization**: Recharts
-- **Chrome Extension APIs**: 
-  - Storage API
-  - History API
-  - Tabs API
-  - Windows API
-
 ## Installation
 
 1. Clone the repository:
