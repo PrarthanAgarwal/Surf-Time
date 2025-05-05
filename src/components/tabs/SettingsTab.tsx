@@ -1,16 +1,11 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { UserSettings, ExportData } from '@/lib/types';
 import { dataService } from '@/lib/dataService';
 import { insightService } from '@/lib/insightService';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Upload, Trash2, RefreshCw } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Download, Upload, Trash2, RefreshCw, Github, Twitter } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { getCurrentTab } from '@/lib/chromeApiService';
 
@@ -174,7 +169,7 @@ const SettingsTab = () => {
     <div className="container mx-auto fade-in">
       <h2 className="text-2xl font-bold mb-6">Settings</h2>
       
-      {/* Extension status indicator */}
+      {/* Extension status indicator - only visible in settings tab */}
       {isExtensionContext ? (
         <Card className="mb-6">
           <CardContent className="pt-6">
@@ -197,112 +192,6 @@ const SettingsTab = () => {
       )}
       
       <div className="space-y-6">
-        {/* Data Sources */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Data Sources</CardTitle>
-            <CardDescription>Configure how your browsing data is collected</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="use-mock-data" className="text-base">Use Sample Data</Label>
-                <p className="text-sm text-muted-foreground">
-                  Use demo data instead of your actual browsing history
-                </p>
-              </div>
-              <Switch 
-                id="use-mock-data"
-                checked={settings.useMockData}
-                onCheckedChange={(checked) => handleSettingChange('useMockData', checked)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="days-to-fetch" className="text-base">History Days</Label>
-              <p className="text-sm text-muted-foreground mb-2">
-                Number of days of history to analyze
-              </p>
-              <Select 
-                value={settings.historyDaysToFetch.toString()} 
-                onValueChange={(value) => handleSettingChange('historyDaysToFetch', parseInt(value))}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select days" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 day</SelectItem>
-                  <SelectItem value="7">7 days</SelectItem>
-                  <SelectItem value="14">14 days</SelectItem>
-                  <SelectItem value="30">30 days</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Preferences</CardTitle>
-            <CardDescription>Customize your experience</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="auto-generate" className="text-base">Auto-generate Insights</Label>
-                <p className="text-sm text-muted-foreground">
-                  Automatically generate new insights when opening the extension
-                </p>
-              </div>
-              <Switch 
-                id="auto-generate"
-                checked={settings.autoGenerateInsights}
-                onCheckedChange={(checked) => handleSettingChange('autoGenerateInsights', checked)}
-              />
-            </div>
-            
-            <div>
-              <Label className="text-base">Theme</Label>
-              <p className="text-sm text-muted-foreground mb-2">
-                Choose your preferred appearance
-              </p>
-              <RadioGroup 
-                className="flex space-x-4" 
-                value={settings.theme}
-                onValueChange={(value) => handleSettingChange('theme', value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="light" id="light" />
-                  <Label htmlFor="light">Light</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="dark" id="dark" />
-                  <Label htmlFor="dark">Dark</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="system" id="system" />
-                  <Label htmlFor="system">System</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="privacy-mode" className="text-base">Privacy Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Hide specific website names and URLs
-                </p>
-              </div>
-              <Switch 
-                id="privacy-mode"
-                checked={settings.privacyMode}
-                onCheckedChange={(checked) => handleSettingChange('privacyMode', checked)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-        
         {/* Data Management */}
         <Card>
           <CardHeader>
@@ -368,6 +257,26 @@ const SettingsTab = () => {
             <p className="text-sm mt-2">
               This extension helps you track and visualize your browsing habits with fun insights.
             </p>
+            <div className="flex mt-4 gap-4">
+              <a 
+                href="https://github.com/surftime" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors"
+              >
+                <Github className="h-4 w-4 mr-1" />
+                GitHub
+              </a>
+              <a 
+                href="https://twitter.com/surftime" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-sm text-gray-600 hover:text-primary transition-colors"
+              >
+                <Twitter className="h-4 w-4 mr-1" />
+                Twitter
+              </a>
+            </div>
           </CardContent>
           <CardFooter className="border-t pt-4">
             <Button variant="outline" size="sm" onClick={() => {}}>

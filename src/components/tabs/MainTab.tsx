@@ -12,6 +12,7 @@ const MainTab = () => {
   const [weekSummaries, setWeekSummaries] = useState<DailySummary[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
+  const [selectedDateRecords, setSelectedDateRecords] = useState<BrowsingRecord[]>([]);
   
   useEffect(() => {
     // Get current tab info
@@ -35,7 +36,10 @@ const MainTab = () => {
       const fullWeekData = ensureFullWeekData(allSummaries);
       setWeekSummaries(fullWeekData);
       
-      setSelectedDate(fullWeekData[fullWeekData.length - 1]?.date || '');
+      // Set today as the default selected date
+      const today = new Date().toISOString().split('T')[0];
+      setSelectedDate(today);
+      setSelectedDateRecords(todayRecords);
     };
     
     initializeData();
@@ -89,7 +93,8 @@ const MainTab = () => {
   
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
-    setTodayRecords(dataService.getRecordsByDate(date));
+    const records = dataService.getRecordsByDate(date);
+    setSelectedDateRecords(records);
   };
   
   const formatDate = (dateStr: string) => {
@@ -154,14 +159,14 @@ const MainTab = () => {
               return (
                 <div 
                   key={index}
-                  className="flex flex-col items-center flex-1"
+                  className="flex flex-col items-center flex-1 cursor-pointer"
                   onClick={() => handleDateSelect(summary.date)}
                 >
                   <div 
-                    className={`w-10 rounded-t-md bar-animation ${
+                    className={`w-10 rounded-t-md transition-all duration-300 ${
                       selectedDate === summary.date 
                         ? 'bg-primary' 
-                        : 'bg-primary/40 hover:bg-primary/60 cursor-pointer'
+                        : 'bg-primary/40 hover:bg-primary/60'
                     }`}
                     style={{ height: `${heightPercentage}%` }}
                   ></div>
@@ -179,13 +184,13 @@ const MainTab = () => {
           {selectedDate ? `Sites Visited (${formatDate(selectedDate)})` : 'Sites Visited'}
         </h2>
         <div className="space-y-3 max-h-48 overflow-auto">
-          {todayRecords.length === 0 ? (
+          {selectedDateRecords.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No browsing history for this day</p>
           ) : (
-            todayRecords.map(record => (
+            selectedDateRecords.map(record => (
               <Card key={record.timestamp} className="p-3 flex items-center">
                 <div className={`w-10 h-10 rounded-md flex items-center justify-center mr-3 ${getDomainColor(record.domain)}`}>
-                  <span className="text-lg">{record.domain.charAt(0).toUpperCase()}</span>
+                  <span className="text-lg text-white">{record.domain.charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{record.title}</p>
