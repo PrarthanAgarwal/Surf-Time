@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { UserSettings, ExportData } from '@/lib/types';
 import { dataService } from '@/lib/dataService';
@@ -9,20 +8,37 @@ import { Download, Upload, Trash2, RefreshCw, Github, Twitter } from 'lucide-rea
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { getCurrentTab } from '@/lib/chromeApiService';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getFromExtensionStorage, saveToExtensionStorage } from '@/lib/extensionStorage';
+
+// Storage keys (moved from config.ts)
+const STORAGE_KEYS = {
+  API_KEY: 'gemini_api_key'
+};
 
 const SettingsTab = () => {
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState<chrome.tabs.Tab | null>(null);
   const [isExtensionContext, setIsExtensionContext] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
   
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const currentSettings = dataService.getSettings();
         setSettings(currentSettings);
+        
+        // Load API key if exists
+        const savedKey = await getFromExtensionStorage<string>(STORAGE_KEYS.API_KEY);
+        if (savedKey) {
+          setApiKey(savedKey);
+        }
       } catch (error) {
         console.error('Error loading settings:', error);
       } finally {
@@ -162,6 +178,32 @@ const SettingsTab = () => {
     });
   };
   
+  const handleSaveApiKey = async () => {
+    setError(null);
+    setIsSaved(false);
+
+    if (!apiKey.trim()) {
+      setError('API key is required');
+      return;
+    }
+
+    try {
+      // Save the API key
+      await saveToExtensionStorage(STORAGE_KEYS.API_KEY, apiKey.trim());
+      setIsSaved(true);
+      
+      toast({
+        title: "Success",
+        description: "API key saved successfully!",
+      });
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to save API key');
+    }
+  };
+  
   if (isLoading || !settings) {
     return <div className="flex justify-center items-center h-full">Loading settings...</div>;
   }
@@ -285,6 +327,60 @@ const SettingsTab = () => {
               Check for Updates
             </Button>
           </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Gemini API Settings</CardTitle>
+            <CardDescription>
+              Configure your Gemini API key to enable AI-powered insights.
+              Get your API key from the Google AI Studio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Enter your Gemini API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <p className="text-sm text-gray-500">
+                Your API key is stored securely in your browser's local storage.
+              </p>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {isSaved && (
+              <Alert>
+                <AlertDescription>API key saved successfully!</AlertDescription>
+              </Alert>
+            )}
+
+            <Button 
+              onClick={handleSaveApiKey}
+              className="w-full"
+            >
+              Save API Key
+            </Button>
+
+            <div className="text-sm text-gray-500">
+              <p>Need an API key?</p>
+              <a 
+                href="https://ai.google.dev/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Visit Google AI Studio →
+              </a>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>

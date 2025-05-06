@@ -1,4 +1,3 @@
-
 import { BrowsingRecord, DailySummary, ExportData, UserSettings } from "./types";
 import { extractDomain, generateDailySummaries, generateMockData, getDateString } from "./utils";
 import { getFromExtensionStorage, saveToExtensionStorage, isExtensionContext } from "./extensionStorage";
@@ -239,7 +238,22 @@ class DataService {
   
   // Get all daily summaries
   getAllSummaries(): DailySummary[] {
-    return [...this.summaries];
+    // Sort summaries by date
+    const sortedSummaries = [...this.summaries].sort((a, b) => a.date.localeCompare(b.date));
+    
+    // Get the most recent Monday
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday
+    const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysFromMonday);
+    monday.setHours(0, 0, 0, 0);
+    
+    // Filter summaries to only include data from the most recent Monday
+    return sortedSummaries.filter(summary => {
+      const summaryDate = new Date(summary.date);
+      return summaryDate >= monday;
+    });
   }
   
   // Get summary for a specific day

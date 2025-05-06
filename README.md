@@ -1,85 +1,110 @@
-# Surf Time - Browser Time Tracking Extension
+# 🏄‍♂️ Surf Time - Your Digital Time Tracker
 
-A Chrome extension that helps you track and analyze your browsing habits to gain insights about your screen time.
+> Catch the perfect wave of productivity with Surf Time - the browser extension that helps you ride the web mindfully! 🌊
 
-## Features
+![Surf Time Banner](assets/banner.png)
 
-- Track active browsing time across different websites
-- Analyze browsing patterns and habits
-- View detailed statistics about your internet usage
-- Privacy-focused local data storage
-- Beautiful and intuitive user interface built with React and shadcn-ui
+## 🎯 What's This Wave About?
 
-## Installation
+Surf Time is your personal digital lifeguard, keeping an eye on your browsing habits and helping you stay on top of your online time. Whether you're diving deep into work or just catching some casual waves on the internet, Surf Time's got your back!
 
-1. Clone the repository:
-```sh
-git clone <repository-url>
-cd screen-savvy-soul-searcher
-```
+### 🌟 Key Features
 
-2. Install dependencies:
-```sh
-npm install
-```
+- **📊 Real-Time Wave Tracking**
+  - Beautiful, interactive charts showing your daily surf patterns
+  - Weekly insights into your browsing habits
+  - Track time spent on different websites like waves on your favorite beach
 
-3. Build the extension:
-```sh
-npm run build
-```
+- **🎨 Clean, Modern UI**
+  - Sleek, minimalist design that's easy on the eyes
+  - Responsive charts and animations
+  - Dark mode support for night surfing 🌙
 
-4. Load the extension in Chrome:
-   - Open Chrome and navigate to `chrome://extensions/`
-   - Enable "Developer mode" in the top right
-   - Click "Load unpacked" and select the `dist` folder from your project directory
+- **🧠 Smart Insights**
+  - AI-powered analysis of your browsing patterns
+  - Personalized tips for better digital wellness
+  - Weekly surf reports of your online activity
 
-## Development
+- **🔒 Privacy First**
+  - All data stays local on your device
+  - No tracking, no data collection
+  - You're the only one who sees your waves
 
-1. Start the development server:
-```sh
-npm run dev
-```
+## 🚀 Quick Start
 
-2. For development builds with hot reload:
-```sh
-npm run build:dev
-```
+1. **Install the Extension**
+   ```bash
+   # Clone the repo
+   git clone https://github.com/yourusername/surf-time.git
+   cd surf-time
 
-3. Lint the code:
-```sh
-npm run lint
-```
+   # Install dependencies
+   npm install
 
-## Project Structure
+   # Build the extension
+   npm run build
+   ```
 
-- `/src` - Main source code
-  - `/components` - React components
-  - `/hooks` - Custom React hooks
-  - `/lib` - Utility functions and shared logic
-- `/public` - Static assets and manifest.json
-- `/dist` - Build output directory
+2. **Load in Chrome**
+   - Open Chrome and go to `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` folder
 
-## Permissions
+3. **Start Surfing! 🏄‍♂️**
+   - Click the Surf Time icon in your browser
+   - Watch your waves roll in as you browse
+   - Check your stats anytime
 
-This extension requires the following permissions:
-- `history` - To track browsing history
-- `storage` - To store user preferences and tracking data
-- `tabs` - To monitor active tabs
-- `activeTab` - To access the current tab
-- `windows` - To track window focus state
+## 🎨 Features in Action
 
-## Privacy
+### Daily Wave Tracking
+![Daily Tracking](assets/daily-tracking.png)
+Track your daily internet surfing with beautiful visualizations
 
-All data is stored locally on your device. No data is sent to external servers.
+### Weekly Surf Report
+![Weekly Report](assets/weekly-report.png)
+See your browsing patterns across the week
 
-## Contributing
+### Smart Insights
+![Insights](assets/insights.png)
+Get AI-powered insights about your browsing habits
 
-1. Fork the repository
+## 🛠️ Tech Stack
+
+- **Frontend**: React + TypeScript
+- **State Management**: React Context
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **AI**: Google Gemini API
+- **Build**: Vite + Chrome Extension Manifest V3
+
+## 🤝 Contributing
+
+Wanna help make these waves bigger? Awesome! Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
+
+1. Fork the repo
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
+## 📝 License
 
-This project is licensed under the MIT License.
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 🌟 Show Your Support
+
+If Surf Time helps you ride the digital waves better, consider giving us a star! ⭐
+
+## 🏆 Acknowledgments
+
+- 🎨 Icons by [Heroicons](https://heroicons.com)
+- 📊 Charts powered by [Recharts](https://recharts.org)
+- 🎯 Inspired by the need for mindful browsing
+
+---
+
+<p align="center">Made with 🌊 by surf enthusiasts for web surfers</p>
+
+> **Note**: Remember to replace placeholder images (`assets/banner.png`, etc.) with actual screenshots of your extension in action!

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { InsightType } from '@/lib/types';
 import { insightService } from '@/lib/insightService';
@@ -28,8 +27,12 @@ const InsightsTab = () => {
       await dataService.initialize();
       const records = dataService.getAllRecords();
       
+      console.log('Generating insights with records:', records);
+      
       // Generate insights based on real browsing data
       const newInsights = await insightService.generateInsights(records);
+      console.log('Generated insights:', newInsights);
+      
       setInsights(newInsights);
     } catch (error) {
       console.error('Failed to generate insights:', error);

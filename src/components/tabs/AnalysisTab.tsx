@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { dataService } from '@/lib/dataService';
 import { formatTime } from '@/lib/utils';
@@ -15,6 +14,7 @@ const AnalysisTab = () => {
     const initializeData = async () => {
       await dataService.initialize();
       const summaries = dataService.getAllSummaries();
+      const records = dataService.getAllRecords();
       
       // Process data for the week trend chart
       const weekData = summaries.map(summary => ({
@@ -24,8 +24,6 @@ const AnalysisTab = () => {
       
       // Process data for the domains chart
       const domainMap = new Map<string, number>();
-      const records = dataService.getAllRecords();
-      
       records.forEach(record => {
         const current = domainMap.get(record.domain) || 0;
         domainMap.set(record.domain, current + record.timeSpent);
@@ -39,17 +37,39 @@ const AnalysisTab = () => {
         .sort((a, b) => b.minutes - a.minutes)
         .slice(0, 8); // Get top 8 domains
       
-      // Create time distribution data (mock data for the distribution)
-      const mockTimeDistribution = [
-        { name: 'Morning', value: 35 },
-        { name: 'Afternoon', value: 40 },
-        { name: 'Evening', value: 20 },
-        { name: 'Night', value: 5 },
-      ];
+      // Calculate real time distribution
+      const timeSlots = {
+        Morning: { start: 5, end: 12, total: 0 },
+        Afternoon: { start: 12, end: 17, total: 0 },
+        Evening: { start: 17, end: 22, total: 0 },
+        Night: { start: 22, end: 5, total: 0 }
+      };
+      
+      let totalTime = 0;
+      records.forEach(record => {
+        const date = new Date(record.timestamp);
+        const hour = date.getHours();
+        totalTime += record.timeSpent;
+        
+        for (const [slot, time] of Object.entries(timeSlots)) {
+          if (
+            (time.start < time.end && hour >= time.start && hour < time.end) ||
+            (time.start > time.end && (hour >= time.start || hour < time.end))
+          ) {
+            timeSlots[slot].total += record.timeSpent;
+            break;
+          }
+        }
+      });
+      
+      const timeDistribution = Object.entries(timeSlots).map(([name, data]) => ({
+        name,
+        value: totalTime > 0 ? Math.round((data.total / totalTime) * 100) : 0
+      }));
       
       setWeekData(weekData);
       setDomainsData(domainsData);
-      setTimeDistribution(mockTimeDistribution);
+      setTimeDistribution(timeDistribution);
     };
     
     initializeData();
@@ -71,7 +91,7 @@ const AnalysisTab = () => {
             <h3 className="text-lg font-semibold mb-3">Weekly Screen Time Trend</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weekData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={weekData}>
                   <defs>
                     <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
@@ -81,12 +101,12 @@ const AnalysisTab = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                   <YAxis 
-                    tickFormatter={(value) => `${value}m`}
+                    tickFormatter={(value) => formatTime(value * 60)}
                     tick={{ fontSize: 12 }}
-                    width={35}
+                    width={45}
                   />
                   <Tooltip 
-                    formatter={(value) => [`${value} min`, 'Screen Time']}
+                    formatter={(value) => [formatTime(Number(value) * 60), 'Screen Time']}
                     labelFormatter={(label) => `${label}`}
                   />
                   <Area 
@@ -129,14 +149,14 @@ const AnalysisTab = () => {
                   margin={{ top: 10, right: 10, left: 50, bottom: 10 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis type="number" tickFormatter={(value) => `${value}m`} />
+                  <XAxis type="number" tickFormatter={(value) => formatTime(value * 60)} />
                   <YAxis 
                     dataKey="domain" 
                     type="category" 
                     tick={{ fontSize: 12 }}
                     width={120}
                   />
-                  <Tooltip formatter={(value) => [`${value} min`, 'Screen Time']} />
+                  <Tooltip formatter={(value) => [formatTime(Number(value) * 60), 'Screen Time']} />
                   <Bar dataKey="minutes" fill="#9b87f5" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -166,22 +186,20 @@ const AnalysisTab = () => {
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium">Peak Usage Time</h4>
-                <p className="text-sm text-gray-600">You're most active between 2PM and 4PM</p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium">Browsing Streaks</h4>
-                <p className="text-sm text-gray-600">Longest continuous session: 1h 24m</p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium">Site Transitions</h4>
-                <p className="text-sm text-gray-600">You most often move from YouTube to Twitter</p>
+                <p className="text-sm text-gray-600">
+                  {timeDistribution.length > 0 
+                    ? `You're most active during ${timeDistribution.reduce((a, b) => a.value > b.value ? a : b).name}`
+                    : 'Not enough data to determine peak usage time'}
+                </p>
               </div>
               
               <div>
                 <h4 className="font-medium">Weekend vs. Weekday</h4>
-                <p className="text-sm text-gray-600">25% more browsing on weekends</p>
+                <p className="text-sm text-gray-600">
+                  {weekData.length >= 7 
+                    ? 'Analysis based on your weekly data'
+                    : 'Need more data for weekend vs weekday analysis'}
+                </p>
               </div>
             </div>
           </Card>

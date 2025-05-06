@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { BrowsingRecord, DailySummary } from "./types";
@@ -9,17 +8,22 @@ export function cn(...inputs: ClassValue[]) {
 
 // Format seconds to hours and minutes
 export function formatTime(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   
   if (hours > 0) {
     return `${hours}h ${minutes}m`;
   }
+  return `${minutes}m`;
+}
+
+export function formatTimeSpent(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
   
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
   return `${minutes}m`;
 }
 

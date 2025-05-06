@@ -1,8 +1,8 @@
-
 import { InsightType } from "./types";
 import { getFromExtensionStorage, saveToExtensionStorage } from "./extensionStorage";
 import { BrowsingRecord } from "./types";
 import { requestInsightsGeneration } from "./chromeApiService";
+import { formatTimeSpent } from "./utils";
 
 // Storage key for insights
 const INSIGHTS_STORAGE_KEY = 'generated_insights';
@@ -59,92 +59,90 @@ class InsightService {
       
       // Send message to background script to generate insights
       if (typeof chrome !== 'undefined' && chrome.runtime) {
-        try {
-          const response = await requestInsightsGeneration({
-            totalTime: totalTimeInSeconds,
-            topSites,
-            domainCount
-          });
-          
-          if (response && response.success && response.insights) {
-            this.insights = response.insights;
-            await this.saveToStorage();
-            return this.insights;
-          }
-        } catch (error) {
-          console.error('Error requesting insights generation:', error);
+        const response = await requestInsightsGeneration({
+          totalTime: totalTimeInSeconds,
+          topSites,
+          domainCount
+        });
+        
+        if (response && response.success && response.insights) {
+          this.insights = response.insights;
+          await this.saveToStorage();
+          return this.insights;
         }
+        
+        // Only throw error if we didn't get insights in the response
+        if (!response || !response.insights) {
+          console.error('Failed to get insights from Gemini API:', response?.error || 'Unknown error');
+          throw new Error('Failed to generate insights from Gemini API');
+        }
+        
+        // If we have insights but success was false, still use them
+        this.insights = response.insights;
+        await this.saveToStorage();
+        return this.insights;
       }
       
-      // Fallback to mock insights if background script request fails
+      // Only use mock insights if Chrome runtime is not available (development/testing)
       const mockInsights = this.generateMockInsights(totalTimeInSeconds, topSites, domainCount);
       this.insights = mockInsights;
       await this.saveToStorage();
-      return this.insights;
+      return mockInsights;
     } catch (error) {
       console.error('Error generating insights:', error);
-      // Return existing insights if available
-      return this.insights.length > 0 ? this.insights : this.generateMockInsights(0, [], 0);
+      throw error;
     } finally {
       this.isLoading = false;
     }
   }
   
-  // Temporary mock insight generator (fallback when extension context is unavailable)
   private generateMockInsights(totalTime: number, topSites: string[], domainCount: number): InsightType[] {
     return [
       {
-        id: '1',
-        title: 'Digital Mountain Climber',
-        description: `Your ${Math.round(totalTime/60)} minutes of scrolling this week is equivalent to climbing Mount Everest 1.2 times!`,
-        icon: '🏔️'
+        id: 'mock-1',
+        title: "Digital Explorer",
+        description: `You've ventured through ${domainCount} unique domains in your online journey!`,
+        icon: "🌐"
       },
       {
-        id: '2',
-        title: 'Virtual Bookworm',
-        description: `If your browsing across ${domainCount} websites was printed on paper, you'd have read the equivalent of "War and Peace" - twice!`,
-        icon: '📚'
+        id: 'mock-2',
+        title: "Time Traveler",
+        description: `Spent ${formatTimeSpent(totalTime)} exploring the digital universe.`,
+        icon: "⏰"
       },
       {
-        id: '3',
-        title: 'Social Butterfly Effect',
-        description: `Your clicks across ${topSites[0] || 'your favorite sites'} have created ripples of digital connections spanning five continents!`,
-        icon: '🦋'
+        id: 'mock-3',
+        title: "Top Destinations",
+        description: `Your favorite stops: ${topSites[0]} and ${topSites[1] || 'more'}`,
+        icon: "🌟"
       },
       {
-        id: '4',
-        title: 'Digital Polyglot',
-        description: `With your browsing time on ${topSites[1] || 'educational sites'}, you could have learned the basics of three new languages!`,
-        icon: '🗣️'
+        id: 'mock-4',
+        title: "Web Wanderer",
+        description: "Like a digital nomad, you've created your own path through the internet.",
+        icon: "🚶"
       },
       {
-        id: '5',
-        title: 'Sunset Collector',
-        description: `Your browsing session equals watching ${Math.round(totalTime / 1800)} beautiful sunsets from start to finish!`,
-        icon: '🌅'
+        id: 'mock-5',
+        title: "Curiosity Champion",
+        description: "Each click is a new discovery waiting to happen!",
+        icon: "🔍"
       }
     ];
   }
   
-  // Check if insights are being generated
+  getInsights(): InsightType[] {
+    return this.insights;
+  }
+  
   isGenerating(): boolean {
     return this.isLoading;
   }
-  
-  // Get previously generated insights
-  async getInsights(): Promise<InsightType[]> {
-    if (this.insights.length === 0) {
-      await this.loadFromStorage();
-    }
-    return [...this.insights];
-  }
-  
-  // Clear stored insights
+
   async clearInsights(): Promise<void> {
     this.insights = [];
-    await saveToExtensionStorage(INSIGHTS_STORAGE_KEY, null);
+    await this.saveToStorage();
   }
 }
 
-// Create and export a singleton instance
 export const insightService = new InsightService();
