@@ -1,12 +1,9 @@
-# 🏄‍♂️ Surf Time - Your Digital Time Tracker
+<p align="left">
+  <img src="public/assets/logo.png" alt="Surf Time Logo" width="200"/>
+</p>
 
-> Catch the perfect wave of productivity with Surf Time - the browser extension that helps you ride the web mindfully! 🌊
-
-![Surf Time Banner](assets/banner.png)
-
-## 🎯 What's This Wave About?
-
-Surf Time is your personal digital lifeguard, keeping an eye on your browsing habits and helping you stay on top of your online time. Whether you're diving deep into work or just catching some casual waves on the internet, Surf Time's got your back!
+# Surf Time - Your Digital Time Tracker
+Surf Time is your personal screentime extension, keeping an eye on your browsing habits and helping you stay on top of your online time. Whether you're diving deep into work or just catching some casual waves on the internet, Surf Time's got your back!
 
 ### 🌟 Key Features
 
@@ -15,12 +12,7 @@ Surf Time is your personal digital lifeguard, keeping an eye on your browsing ha
   - Weekly insights into your browsing habits
   - Track time spent on different websites like waves on your favorite beach
 
-- **🎨 Clean, Modern UI**
-  - Sleek, minimalist design that's easy on the eyes
-  - Responsive charts and animations
-  - Dark mode support for night surfing 🌙
-
-- **🧠 Smart Insights**
+- **🧠 Fun Insights**
   - AI-powered analysis of your browsing patterns
   - Personalized tips for better digital wellness
   - Weekly surf reports of your online activity
@@ -58,17 +50,17 @@ Surf Time is your personal digital lifeguard, keeping an eye on your browsing ha
 
 ## 🎨 Features in Action
 
-### Daily Wave Tracking
-![Daily Tracking](assets/daily-tracking.png)
-Track your daily internet surfing with beautiful visualizations
+<p align="center">
+  <img src="public/assets/dashboard.PNG" alt="Dashboard" width="800"/>
+</p>
 
-### Weekly Surf Report
-![Weekly Report](assets/weekly-report.png)
-See your browsing patterns across the week
+<p align="center">
+  <img src="public/assets/analysis.PNG" alt="Analysis" width="800"/>
+</p>
 
-### Smart Insights
-![Insights](assets/insights.png)
-Get AI-powered insights about your browsing habits
+<p align="center">
+  <img src="public/assets/insights.PNG" alt="Insights" width="800"/>
+</p>
 
 ## 🛠️ Tech Stack
 
@@ -93,18 +85,4 @@ Wanna help make these waves bigger? Awesome! Check out our [Contributing Guide](
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 🌟 Show Your Support
-
-If Surf Time helps you ride the digital waves better, consider giving us a star! ⭐
-
-## 🏆 Acknowledgments
-
-- 🎨 Icons by [Heroicons](https://heroicons.com)
-- 📊 Charts powered by [Recharts](https://recharts.org)
-- 🎯 Inspired by the need for mindful browsing
-
----
-
-<p align="center">Made with 🌊 by surf enthusiasts for web surfers</p>
-
-> **Note**: Remember to replace placeholder images (`assets/banner.png`, etc.) with actual screenshots of your extension in action!
+<p align="center">Made it to school my friend on his screentime</p>
