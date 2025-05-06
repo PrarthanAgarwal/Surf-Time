@@ -59,4 +59,4 @@ chrome.runtime.sendMessage({
 });
 
 // Initialize
-console.log('Screen Savvy Soul Searcher initialized on page');
+console.log('Surf Time initialized on page');
