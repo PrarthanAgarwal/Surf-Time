@@ -51,15 +51,15 @@ Surf Time is your personal screentime extension, keeping an eye on your browsing
 ## 🎨 Features in Action
 
 <p align="center">
-  <img src="public/assets/dashboard.PNG" alt="Dashboard" width="800"/>
+  <img src="public/assets/dashboard.PNG" alt="Dashboard" width="200"/>
 </p>
 
 <p align="center">
-  <img src="public/assets/analysis.PNG" alt="Analysis" width="800"/>
+  <img src="public/assets/analysis.PNG" alt="Analysis" width="200"/>
 </p>
 
 <p align="center">
-  <img src="public/assets/insights.PNG" alt="Insights" width="800"/>
+  <img src="public/assets/insights.PNG" alt="Insights" width="200"/>
 </p>
 
 ## 🛠️ Tech Stack
