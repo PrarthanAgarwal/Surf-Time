@@ -3,23 +3,28 @@
 </p>
 
 # Surf Time - Your Digital Time Tracker
-Surf Time is your personal screentime extension, keeping an eye on your browsing habits and helping you stay on top of your online time. Whether you're diving deep into work or just catching some casual waves on the internet, Surf Time's got your back!
+
+This tiny browser extension was born out of an inside joke - to prove to my friend that I dont live inside my laptop! It automatically tracks your browsing time across different websites, visualizes your digital habits, and provides fun insights powered by AI.
+
+Want to know if you're really spending "just 5 minutes" on YouTube? Or if those quick social media checks are actually turning into hour-long sessions? Surf Time's got you covered! It silently runs in the background, collecting your browsing patterns locally (no data ever leaves your device), and presents them in beautiful, easy-to-understand charts.
+
+What makes this different? It's not here to make you feel guilty about your screen time - instead, it turns your browsing data into a fun "surf report", complete with wave analogies and light-hearted insights. Whether you're diving deep into work or just catching some casual waves on the internet, Surf Time helps you understand your digital flow without the judgment.
 
 ### 🌟 Key Features
 
-- **📊 Real-Time Wave Tracking**
-  - Beautiful, interactive charts showing your daily surf patterns
-  - Weekly insights into your browsing habits
-  - Track time spent on different websites like waves on your favorite beach
+- **Real-Time Wave Tracking**
+  - Interactive, visually rich charts of your daily browsing patterns
+  - Weekly summaries to help you understand your digital flow
+  - Per-site tracking that maps your time like waves on a beach
 
-- **🧠 Fun Insights**
-  - AI-powered analysis of your browsing patterns
-  - Personalized tips for better digital wellness
-  - Weekly surf reports of your online activity
+- **Fun Insights**
+  - Smart analysis of your browsing behavior, powered by Gemini
+  - Lighthearted, metaphorical feedback to make data fun
+  - Weekly "surf reports" to boost your digital wellness
 
-- **🔒 Privacy First**
-  - All data stays local on your device
-  - No tracking, no data collection
+- **Privacy First**
+  - All data is stored locally—nothing leaves your device
+  - No trackers, no data harvesting
   - You're the only one who sees your waves
 
 ## 🚀 Quick Start
