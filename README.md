@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="public/assets/logo.png" alt="Surf Time Logo" width="200"/>
+  <img src="public/assets/logo.png" alt="Surf Time Logo" width="100"/>
 </p>
 
 # Surf Time - Your Digital Time Tracker
@@ -50,17 +50,32 @@ Surf Time is your personal screentime extension, keeping an eye on your browsing
 
 ## 🎨 Features in Action
 
-<p align="center">
-  <img src="public/assets/dashboard.PNG" alt="Dashboard" width="200"/>
-</p>
-
-<p align="center">
-  <img src="public/assets/analysis.PNG" alt="Analysis" width="200"/>
-</p>
-
-<p align="center">
-  <img src="public/assets/insights.PNG" alt="Insights" width="200"/>
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <img src="public/assets/dashboard.PNG" alt="Dashboard" width="400"/>
+      <br />
+      <em>Dashboard View</em>
+    </td>
+    <td align="center">
+      <img src="public/assets/analysis.PNG" alt="Analysis" width="400"/>
+      <br />
+      <em>Analysis View</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="public/assets/insights.PNG" alt="Insights" width="400"/>
+      <br />
+      <em>Insights View</em>
+    </td>
+    <td align="center">
+      <img src="public/assets/settings.PNG" alt="Settings" width="400"/>
+      <br />
+      <em>Settings View</em>
+    </td>
+  </tr>
+</table>
 
 ## 🛠️ Tech Stack
 
